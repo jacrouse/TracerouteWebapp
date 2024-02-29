@@ -1,11 +1,31 @@
 //takes html input and makes a call to server for traceroute
 function traceRoute(host)
 {
-    document.getElementById("resultsTitle").innerHTML += "Results for: " + host.value;
+    //get title and clear it
+    var resultsTitle = document.getElementById("resultsTitle");
+    resultsTitle.innerHTML = "";
 
-    //tracert will go here
+    //get body and clear it
+    var resultsBody = document.getElementById("resultsBody");
+    resultsBody.innerHTML = "";
 
-    document.getElementById("resultsBody").innerHTML += "results body";
+    resultsTitle.innerHTML += "Results for " + host.value;
+    
+    var $j = jQuery.noConflict();
+
+    var tracertServerHost = "http://127.0.0.1:5000/request";
+
+    $j.ajax({
+        url: tracertServerHost,
+        type: 'POST',
+        data: host.value,
+        dataType: 'text',
+        success: function(response)
+        {
+            resultsBody += response;
+        }
+        }
+    );
 }
 
 
