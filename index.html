@@ -13,15 +13,24 @@
       </center>
     </h1>
     <title>Traceroute Webapp</title>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
-    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <script src= "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"> </script>
+  
     <script type="module" src="./index.js"></script>
+    <script type="text/javascript" src="./traceroute.js"></script> 
+    <link rel="stylesheet" type="text/css" href="./style.css" />
     <script type="text/javascript" src="./apiKey.js"></script>
+    <script>
+      function init(){
+        traceroute_main();
+
+      }
+      </script>
   </head>
 
 
-  <body>
+  <body onload="init()">
     <div id="map"></div>
 
     <!-- prettier-ignore -->
@@ -36,7 +45,12 @@
           <input type="text" id="host" class="form-control"><br><br>
           <button type="submit">Trace Route</button>
         </form>
+        <br>
+
+        Your IP address is: 
+        <p id="gfg"></p>
         
+
         <br><br><br><br>
         <div id="resultsTitle"></div>
 
@@ -46,9 +60,6 @@
 
 
     </center>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-    <script type="text/javascript" src="./traceroute.js"></script>
-    
   </body>
 
 

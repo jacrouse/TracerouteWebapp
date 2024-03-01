@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 import pandas as pd
 from scapy.all import *
 import socket
@@ -9,9 +9,12 @@ import argparse
 app = Flask(__name__)
 
 @app.route('/request', methods=['GET', 'POST'])
-def request(host):
-    return "helo"
-
+def responseHandler():
+    if request.method == "POST":
+        hostname = request.form['request']
+        print(hostname)
+        return jsonify({'result':'you entered: ' + hostname})
+    return jsonify({'result':'sent a get'})
 
 # Traceroute Function
 def traceroute(destination, max_hops=30, timeout=2):
