@@ -23,14 +23,15 @@ function traceroute(host)
         }
     })
     .done(function(response){
+        console.log(response);
         resultsBody.innerHTML += response["result"];
     });
 }
 
 
 function plotPoint(latitude, longitude) {
-    console.log("test");
 
+    console.log("hello");
     const myLatLng = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
     const map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
@@ -46,39 +47,18 @@ function plotPoint(latitude, longitude) {
 }
 
 
-function geolocate_ip(IP)
-{
-    var $j = jQuery.noConflict();
-
-    var geo_url = "http://www.geoplugin.net/json.gp?ip=" + IP;
-    console.log("AAAA");
-    // console.log($j);
-    $j.ajax({
-        url: geo_url,
-        type: "GET"
-    })
-    .done(function(response){
-        var coords = { lat : response["geoplugin_latitude"], lng : response["geoplugin_longitude"] };
-        plotPoint(coords["lat"], coords["lng"]);
-    });
-}
-
 function traceroute_main()
 {
-    /* Add "https://api.ipify.org?format=json" to 
-    get the IP Address of user*/
+    //print visitors IP
     $(document).ready(()=>{
         $.getJSON("https://api.ipify.org?format=json",
         function (data) {
-
             // Displayin IP address on screen
             $("#gfg").html(data.ip);
-            var location = geolocate_ip(data.ip);
-            console.log(location);
         })
     });
 
-
+    
 
     //listen for input
     var inputForm = document.getElementById("inputForm");
