@@ -14,10 +14,13 @@ function traceroute(host)
     var $j = jQuery.noConflict();
 
     let tracertServerHost = "http://127.0.0.1:5000/request";
+    console.log("hello world")
 
     $j.ajax({
         url: tracertServerHost,
         type: "POST",
+        datatype: "jsonp",
+        crossDomain:true,
         data: {
             request : host.value
         }

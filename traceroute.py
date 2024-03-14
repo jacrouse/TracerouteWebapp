@@ -17,7 +17,7 @@ def responseHandler():
         tracerouteResult = traceroute(hostname)
         return jsonify({'result': ''.join(str(x) for x in tracerouteResult)})
     else:
-        return ""
+        return "Failed"
 
 
 #geolocation function
