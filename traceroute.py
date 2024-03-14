@@ -14,10 +14,9 @@ app = Flask(__name__)
 def responseHandler():
     if request.method == "POST":
         hostname = request.form['request']
-        tracerouteResult = traceroute(hostname)
-        return jsonify({'result': ''.join(str(x) for x in tracerouteResult)})
+        return jsonify({'result': traceroute(hostname)}), 200
     else:
-        return "Failed"
+        return jsonify({'result': request.remote_addr}), 200
 
 
 #geolocation function
@@ -48,11 +47,22 @@ def geolocate(host):
         return {host: [lat, lng]}
 
     """
-    return {"testHost": ["testLat", "testLng"]}
+    return ["testlat", "testlng"]
+
+
+#format response
+def formatResponse(response):
+    result = "<br>".join(", ".join(x) for x in response)
+    return result
 
 #traceroute function
 def traceroute(destination, max_hops=30, timeout=1):
-    destination_ip = socket.gethostbyname(destination)
+    #try to get IP
+    try:
+        destination_ip = socket.gethostbyname(destination)
+    except:
+        return "Something went wrong, is this a real host?"
+
     port = 33434
     ttl = 1
 
@@ -72,18 +82,18 @@ def traceroute(destination, max_hops=30, timeout=1):
         if reply is None:
             #no reply, print * for timeout
             #print(f"{ttl}\t*")
-            response.append([destination, ttl, 'noreply', '*'])
+            response.append(["TTL: " + str(ttl), "Noreply", "*"])
         elif reply.type == 3:
             #destination reached, print the details
             #print(f"{ttl}\t{reply.src}")
-            response.append([destination, ttl, 'reached', reply.src])
-            return response
+            response.append(["TTL: " + str(ttl), "Reached", "Source: " + reply.src])
+            return formatResponse(response)
         else:
             #printing the IP address of the intermediate hop
             #print(f"{ttl}\t{reply.src}")
-            response.append([destination, ttl, 'intermediate-hop', reply.src, geolocate(reply.src)])
+            response.append(["TTL: " + str(ttl), "Intermediate-hop", "Source: " + reply.src, "Coords: " + str(geolocate(reply.src))])
 
         ttl += 1
 
         if ttl > max_hops:
-          return response
+            return formatResponse(response)

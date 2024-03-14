@@ -1,6 +1,11 @@
 //takes html input and makes a call to server for traceroute
 function traceroute(host)
 {
+    //get user IP and clear it
+    var userIP = document.getElementById("gfg");
+    userIP.innerHTML = "";
+    userIP.innerHTML = "Your IP address is:<br>";
+
     //get title and clear it
     var resultsTitle = document.getElementById("resultsTitle");
     resultsTitle.innerHTML = "";
@@ -9,12 +14,24 @@ function traceroute(host)
     var resultsBody = document.getElementById("resultsBody");
     resultsBody.innerHTML = "";
 
-    resultsTitle.innerHTML += "Results for " + host.value;
+    resultsTitle.innerHTML += "Please be patient, this can take a while.<br>"
+    resultsTitle.innerHTML += "Results for: " + host.value;
 
     var $j = jQuery.noConflict();
 
     let tracertServerHost = "http://127.0.0.1:5000/request";
-    console.log("hello world")
+
+    //get visitor IP
+    $j.ajax({
+        url: tracertServerHost,
+        type: "GET",
+        datatype: "jsonp",
+        crossDomain:true,
+    })
+    .done(function(response){
+        let contents = response["result"];
+        userIP.innerHTML += contents;
+    });
 
     $j.ajax({
         url: tracertServerHost,
@@ -26,15 +43,13 @@ function traceroute(host)
         }
     })
     .done(function(response){
-        console.log(response);
-        resultsBody.innerHTML += response["result"];
+        let contents = response["result"];
+        resultsBody.innerHTML += contents;
     });
 }
 
 
 function plotPoint(latitude, longitude) {
-
-    console.log("hello");
     const myLatLng = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
     const map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
@@ -52,17 +67,6 @@ function plotPoint(latitude, longitude) {
 
 function traceroute_main()
 {
-    //print visitors IP
-    $(document).ready(()=>{
-        $.getJSON("https://api.ipify.org?format=json",
-        function (data) {
-            // Displayin IP address on screen
-            $("#gfg").html(data.ip);
-        })
-    });
-
-    
-
     //listen for input
     var inputForm = document.getElementById("inputForm");
     inputForm.addEventListener("submit", (e) => {
