@@ -6,6 +6,7 @@ import struct
 import time
 import argparse
 import requests
+import numpy as np
 from requests.structures import CaseInsensitiveDict
 
 app = Flask(__name__)
@@ -27,7 +28,6 @@ def geolocate(host):
 
     #API URL with IP embedded
     
-    
     url = "https://api.geoapify.com/v1/ipinfo?ip=" + IP + "&apiKey=59050c64726a4da1a7d50e726172d4a3"
 
     headers = CaseInsensitiveDict()
@@ -47,12 +47,11 @@ def geolocate(host):
         return {host: [lat, lng]}
 
     """
-    return ["testlat", "testlng"]
-
+    return str(np.random.rand(2) * 10)
 
 #format response
 def formatResponse(response):
-    result = "<br>".join(", ".join(x) for x in response)
+    result = " <br> ".join(", ".join(x) for x in response)
     return result
 
 #traceroute function
@@ -81,18 +80,15 @@ def traceroute(destination, max_hops=30, timeout=1):
 
         if reply is None:
             #no reply, print * for timeout
-            #print(f"{ttl}\t*")
             response.append(["TTL: " + str(ttl), "Noreply", "*"])
         elif reply.type == 3:
             #destination reached, print the details
-            #print(f"{ttl}\t{reply.src}")
             response.append(["TTL: " + str(ttl), "Reached", "Source: " + reply.src])
             return formatResponse(response)
         else:
             #printing the IP address of the intermediate hop
-            #print(f"{ttl}\t{reply.src}")
-            response.append(["TTL: " + str(ttl), "Intermediate-hop", "Source: " + reply.src, "Coords: " + str(geolocate(reply.src))])
-
+            response.append(["TTL: " + str(ttl), "Intermediate-hop", "Source: " + reply.src, "Coords: " + geolocate(reply.src)])
+            
         ttl += 1
 
         if ttl > max_hops:

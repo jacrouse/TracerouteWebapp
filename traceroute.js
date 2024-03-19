@@ -45,13 +45,37 @@ function traceroute(host)
     .done(function(response){
         let contents = response["result"];
         resultsBody.innerHTML += contents;
+
+        //extract coordinates and plot them
+        let instances = contents.split("<br>");
+
+        for(var i = 0; i < instances.length; i++)
+        {
+            let splitContents = instances[i].split(' ');
+            let coordsIndex = splitContents.indexOf("Coords:");
+
+            if(coordsIndex == -1 || coordsIndex + 2 > instances[i].length)
+                continue;
+
+            let lat = splitContents[coordsIndex + 1].replace('[','');
+            var lng = ""; 
+
+            //account for if there is anything between them
+            if((coordsIndex + 2) < (splitContents.length) && splitContents[coordsIndex + 2] == "")
+                lng = splitContents[coordsIndex + 3].replace(']','');
+            else
+                lng = splitContents[coordsIndex + 2].replace(']','');
+
+            plotPoint(lat, lng);
+        }
+        
     });
 }
 
 
 function plotPoint(latitude, longitude) {
-    const myLatLng = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
-    const map = new google.maps.Map(document.getElementById("map"), {
+    var myLatLng = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
+    var map = new google.maps.Map(document.getElementById("map"), {
       zoom: 4,
       center: myLatLng,
     });
