@@ -95,3 +95,6 @@ def traceroute(destination, max_hops=30, timeout=1):
 
         if ttl > max_hops:
             return formatResponse(response)
+
+if __name__ == "__main__":
+    app.run(ssl_context="adhoc")
