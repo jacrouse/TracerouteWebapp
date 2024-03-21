@@ -19,7 +19,7 @@ function traceroute(host)
 
     var $j = jQuery.noConflict();
 
-    let tracertServerHost = "http://45.55.104.184:5000/request";
+    let tracertServerHost = "http://167.99.0.220:5000/request";
 
     //get visitor IP
     $j.ajax({
