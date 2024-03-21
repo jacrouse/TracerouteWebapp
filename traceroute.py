@@ -11,16 +11,21 @@ import numpy as np
 from requests.structures import CaseInsensitiveDict
 
 app = Flask(__name__)
-CORS(app, support_credentials=True)
+app.config["CORS_HEADERS"] = "Content-Type"
+CORS(app)
 
 @app.route('/request', methods=['GET', 'POST'])
 @cross_origin(supports_credentials=True)
 def responseHandler():
     if request.method == "POST":
         hostname = request.form['request']
-        return jsonify({'result': traceroute(hostname)}), 200
+        response = jsonify({'result': traceroute(hostname)})
+        print("Finished traceroute")
+        return response, 200
     else:
-        return jsonify({'result': request.remote_addr}), 200
+        print("Sending client IP")
+        response = jsonify({'result': request.remote_addr})
+        return response, 200
 
 
 #geolocation function
