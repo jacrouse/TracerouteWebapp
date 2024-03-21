@@ -22,7 +22,6 @@ def responseHandler():
 
 #geolocation function
 def geolocate(host):
-    """
     #get IP if not already an IP
     IP = socket.gethostbyname(host)
 
@@ -39,15 +38,18 @@ def geolocate(host):
         #format to json
         json = response.json()
         
-        #extract data
-        lat = json["location"]["latitude"]
-        lng = json["location"]["longitude"]
+        try:
+            #extract data
+            lat = json["location"]["latitude"]
+            lng = json["location"]["longitude"]
+        except(KeyError):
+            return str(["NoLat", "NoLng"])
 
         #return pair
-        return {host: [lat, lng]}
+        return str([lat, lng])
 
-    """
-    return str(np.random.rand(2) * 10)
+
+    #return str(np.random.rand(2) * 10)
 
 #format response
 def formatResponse(response):

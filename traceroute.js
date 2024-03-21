@@ -49,6 +49,13 @@ function traceroute(host)
         //extract coordinates and plot them
         let instances = contents.split("<br>");
 
+        var map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 3,
+            center: { lat: 0.0, lng: 0.0 },
+        });
+
+        var path = [];
+
         for(var i = 0; i < instances.length; i++)
         {
             let splitContents = instances[i].split(' ');
@@ -66,20 +73,29 @@ function traceroute(host)
             else
                 lng = splitContents[coordsIndex + 2].replace(']','');
 
-            plotPoint(lat, lng);
+            //check if no valid coords returned
+            if(lat == "'NoLat'," || lng == "'NoLng'")
+                continue;
+
+            plotPoint(map, lat, lng);
+            path.push({"lat" : parseFloat(lat), "lng" : parseFloat(lng)});
         }
+
+        const outPath = new google.maps.Polyline({
+            path: path,
+            geodesic: true,
+            strokeColor: "#FF0000",
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+        });
         
+        outPath.setMap(map);
     });
 }
 
 
-function plotPoint(latitude, longitude) {
+function plotPoint(map, latitude, longitude) {
     var myLatLng = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
-    var map = new google.maps.Map(document.getElementById("map"), {
-      zoom: 4,
-      center: myLatLng,
-    });
-    
   
     new google.maps.Marker({
       position: myLatLng,
