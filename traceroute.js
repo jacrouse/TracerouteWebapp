@@ -26,7 +26,11 @@ function traceroute(host)
         url: tracertServerHost,
         type: "GET",
         datatype: "jsonp",
+        xhrFields: {
+        	withCredentials: true
+        },
         crossDomain:true,
+     	contentType: 'application/json; charset=utf-8'
     })
     .done(function(response){
         let contents = response["result"];
@@ -37,7 +41,11 @@ function traceroute(host)
         url: tracertServerHost,
         type: "POST",
         datatype: "jsonp",
+        xhrFields: {
+        	withCredentials: true
+        },
         crossDomain:true,
+        contentType: 'applications/json; charset=utf-8',
         data: {
             request : host.value
         }

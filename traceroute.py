@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS, cross_origin
 import pandas as pd
 from scapy.all import *
 import socket
@@ -10,8 +11,10 @@ import numpy as np
 from requests.structures import CaseInsensitiveDict
 
 app = Flask(__name__)
+CORS(app, support_credentials=True)
 
 @app.route('/request', methods=['GET', 'POST'])
+@cross_origin(supports_credentials=True)
 def responseHandler():
     if request.method == "POST":
         hostname = request.form['request']
