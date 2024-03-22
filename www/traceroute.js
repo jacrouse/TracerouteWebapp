@@ -1,6 +1,10 @@
 //takes html input and makes a call to server for traceroute
 function traceroute(host)
 {
+	//disable button
+	var submitButton = document.getElementById("submit");
+	submitButton.disabled = true;
+
     //get user IP and clear it
     var userIP = document.getElementById("gfg");
     userIP.innerHTML = "";
@@ -23,6 +27,7 @@ function traceroute(host)
 
     //get visitor IP
     $j.ajax({
+    	async: false,
         url: tracertServerHost,
         type: "GET",
         xhrFields: {
@@ -37,6 +42,7 @@ function traceroute(host)
     });
 
     $j.ajax({
+    	async: false,
         url: tracertServerHost,
         type: "POST",
         xhrFields: {
@@ -56,7 +62,7 @@ function traceroute(host)
 
         var map = new google.maps.Map(document.getElementById("map"), {
             zoom: 2.5,
-            center: { lat: 0.0, lng: 0.0 },
+            center: { lat: 40.0, lng: 43.0 },
         });
 
         var path = [];
@@ -96,6 +102,7 @@ function traceroute(host)
         });
         
         outPath.setMap(map);
+        submitButton.disabled = false;
     });
 }
 
