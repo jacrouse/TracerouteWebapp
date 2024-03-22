@@ -4,9 +4,11 @@ import pandas as pd
 from scapy.all import *
 import socket
 import struct
+import json
 import time
 import argparse
 import requests
+from urllib.request import urlopen
 import numpy as np
 from requests.structures import CaseInsensitiveDict
 
@@ -34,22 +36,17 @@ def geolocate(host):
     IP = socket.gethostbyname(host)
 
     #API URL with IP embedded
-    
-    url = "https://api.geoapify.com/v1/ipinfo?ip=" + IP + "&apiKey=59050c64726a4da1a7d50e726172d4a3"
+    url = "http://ipwho.is/" + IP
+    response = urlopen(url)
 
-    headers = CaseInsensitiveDict()
-    headers["Accept"] = "application/json"
-
-    response = requests.get(url, headers=headers)
-
-    if(response.status_code == 200):
+    if(response.getcode() == 200):
         #format to json
-        json = response.json()
+        jResponse = json.load(response)
         
         try:
             #extract data
-            lat = json["location"]["latitude"]
-            lng = json["location"]["longitude"]
+            lat = jResponse["latitude"]
+            lng = jResponse["longitude"]
         except(KeyError):
             return str(["NoLat", "NoLng"])
 
