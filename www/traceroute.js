@@ -55,7 +55,7 @@ function traceroute(host)
         let instances = contents.split("<br>");
 
         var map = new google.maps.Map(document.getElementById("map"), {
-            zoom: 1,
+            zoom: 2.5,
             center: { lat: 0.0, lng: 0.0 },
         });
 

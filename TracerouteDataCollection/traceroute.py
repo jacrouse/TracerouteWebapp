@@ -1,38 +1,10 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS, cross_origin
 import pandas as pd
-from scapy.all import *
-import socket
-import struct
 import json
 import time
-import argparse
-import requests
+from scapy.all import *
 from urllib.request import urlopen
-import numpy as np
-from requests.structures import CaseInsensitiveDict
 
-globalClientIP = ""
-
-app = Flask(__name__)
-app.config["CORS_HEADERS"] = "Content-Type"
-CORS(app)
-
-@app.route('/request', methods=['GET', 'POST'])
-@cross_origin(supports_credentials=True)
-def responseHandler():
-    if request.method == "POST":
-        global globalClientIP
-        globalClientIP = request.remote_addr
-        hostname = request.form['request']
-        response = jsonify({'result': traceroute(hostname, 50, 2)})
-        print("Finished traceroute")
-        return response, 200
-    else:
-        print("Sending client IP")
-        response = jsonify({'result': request.remote_addr})
-        return response, 200
-
+globalClientIP = "167.99.0.220"
 
 #geolocation function
 def geolocate(host):
@@ -56,12 +28,6 @@ def geolocate(host):
 
         #return pair
         return str([lat, lng])
-
-
-#format response
-def formatResponse(response):
-    result = " <br> ".join(", ".join(x) for x in response)
-    return result
 
 
 #traceroute function
@@ -89,12 +55,27 @@ def traceroute(destination, max_hops=30, timeout=1):
         if receive.src == destination_ip:
             #destination reached, print the details
             response.append(["TTL: " + str(send.ttl), "Reached", "Source: " + receive.src])
-            return formatResponse(response)
+            return response
         else:
             #printing the IP address of the intermediate hop
             response.append(["TTL: " + str(send.ttl), "Intermediate-hop", "Source: " + receive.src, "Coords: " + geolocate(receive.src)])
 
-    return formatResponse(response)
+    return response
+
+
+def main():
+    try:
+        hosts = ["google.com", "yahoo.com"]
+        while(True):
+            for host in hosts:
+                print(traceroute(host))
+            print("Finished, restarting in 5 seconds")
+            time.sleep(5)
+
+    except(KeyboardInterrupt):
+        exit()
+
+
 
 if __name__ == "__main__":
-    app.run(ssl_context="adhoc")
+    main()
