@@ -81,16 +81,15 @@ function traceroute(host)
             //check if no valid coords returned
             if(lat == "'NoLat'," || lng == "'NoLng'")
                 continue;
-			
+
+			//pass lat, lng, and label
             plotPoint(map, lat, lng);
             path.push({"lat" : parseFloat(lat), "lng" : parseFloat(lng)});
         }
 
-		console.log(path);
-
         const outPath = new google.maps.Polyline({
             path: path,
-            geodesic: true,
+            geodesic: false,
             strokeColor: "#FF0000",
             strokeOpacity: 1.0,
             strokeWeight: 2
@@ -108,6 +107,8 @@ function plotPoint(map, latitude, longitude) {
       position: myLatLng,
       map,
       title: "Hello World!",
+      label: latitude +  ' ' + longitude,
+      fontsize: "10px"
     });
 }
 

@@ -12,6 +12,8 @@ from urllib.request import urlopen
 import numpy as np
 from requests.structures import CaseInsensitiveDict
 
+globalClientIP = ""
+
 app = Flask(__name__)
 app.config["CORS_HEADERS"] = "Content-Type"
 CORS(app)
@@ -20,8 +22,10 @@ CORS(app)
 @cross_origin(supports_credentials=True)
 def responseHandler():
     if request.method == "POST":
+        global globalClientIP
+        globalClientIP = request.remote_addr
         hostname = request.form['request']
-        response = jsonify({'result': traceroute(hostname)})
+        response = jsonify({'result': traceroute(hostname, 50, 2)})
         print("Finished traceroute")
         return response, 200
     else:
@@ -54,12 +58,11 @@ def geolocate(host):
         return str([lat, lng])
 
 
-    #return str(np.random.rand(2) * 10)
-
 #format response
 def formatResponse(response):
     result = " <br> ".join(", ".join(x) for x in response)
     return result
+
 
 #traceroute function
 def traceroute(destination, max_hops=30, timeout=1):
@@ -69,37 +72,34 @@ def traceroute(destination, max_hops=30, timeout=1):
     except:
         return "Something went wrong, is this a real host?"
 
-    port = 33434
-    ttl = 1
-
     response = []
 
-    while True:
-        #creating the IP and UDP headers
-        ip_packet  = IP(dst=destination, ttl=ttl)
-        udp_packet = UDP(dport=port)
+    #creating the IP and TCP headers
+    ip_packet  = IP(dst=destination, ttl=(1,max_hops), id=RandShort())
+    tcp_packet = TCP(flags=0x2)
 
-        #combining the headers
-        packet = ip_packet / udp_packet
-        
-        #sending the packet and receive a reply
-        reply = sr1(packet, timeout=timeout, verbose=0)
+    #combining the headers
+    packet = ip_packet / tcp_packet
+    
+    #sending the packet and receive a reply
+    s,r = sr(packet, timeout=timeout, verbose=0)
 
-        if reply is None:
-            #no reply, print * for timeout
-            response.append(["TTL: " + str(ttl), "Noreply", "*"])
-        elif reply.type == 3:
+    response.append(["TTL: " + '1', "Origin", "Source: " + globalClientIP, "Coords: " + geolocate(globalClientIP)])
+
+    for send,receive in s:
+        #if reply is None:
+        #    #no reply, print * for timeout
+        #    response.append(["TTL: " + str(ttl), "Noreply", "*"])
+        print(receive.src)
+        if receive.src == destination_ip:
             #destination reached, print the details
-            response.append(["TTL: " + str(ttl), "Reached", "Source: " + reply.src])
+            response.append(["TTL: " + str(send.ttl), "Reached", "Source: " + receive.src])
             return formatResponse(response)
         else:
             #printing the IP address of the intermediate hop
-            response.append(["TTL: " + str(ttl), "Intermediate-hop", "Source: " + reply.src, "Coords: " + geolocate(reply.src)])
-            
-        ttl += 1
+            response.append(["TTL: " + str(send.ttl), "Intermediate-hop", "Source: " + receive.src, "Coords: " + geolocate(receive.src)])
 
-        if ttl > max_hops:
-            return formatResponse(response)
+    return formatResponse(response)
 
 if __name__ == "__main__":
     app.run(ssl_context="adhoc")
