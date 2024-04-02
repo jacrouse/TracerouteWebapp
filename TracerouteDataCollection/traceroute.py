@@ -38,7 +38,9 @@ def traceroute(destination, max_hops=30, timeout=1):
     except:
         return "Something went wrong, is this a real host?"
 
-    response = []
+    #this will be added to data frame later
+    #columns are TTL, Source, 
+    response = ()
 
     #creating the IP and TCP headers
     ip_packet  = IP(dst=destination, ttl=(1,max_hops), id=RandShort())
@@ -49,12 +51,12 @@ def traceroute(destination, max_hops=30, timeout=1):
     
     #sending the packet and receive a reply
     s,r = sr(packet, timeout=timeout, verbose=0)
-    response.append(["TTL: " + '1', "Origin", "Source: " + globalClientIP, "Coords: " + geolocate(globalClientIP)])
+    response.append(["TTL: " + '0', "Origin", "Source: " + globalClientIP, "Coords: " + geolocate(globalClientIP)])
 
     for send,receive in s:
         if receive.src == destination_ip:
             #destination reached, print the details
-            response.append(["TTL: " + str(send.ttl), "Reached", "Source: " + receive.src])
+            response.append(str(send.ttl), "Reached", "Source: " + receive.src])
             return response
         else:
             #printing the IP address of the intermediate hop
