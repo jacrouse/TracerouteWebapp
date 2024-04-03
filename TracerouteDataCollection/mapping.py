@@ -7,14 +7,15 @@ from colorhash import ColorHash
 def mapping(m, dest, coordinates):
     #generate unique color from destination string
     hexColor = ColorHash(dest).hex
-    folium.PolyLine(coordinates, tooltip="Path", color=hexColor).add_to(m)
+
+    #coordinates must be a tuple
+    folium.PolyLine(tuple(coordinates), tooltip="Path", color=hexColor).add_to(m)
     
     m.save("index.html")
 
 
 def correctForDistance(coordinates):
-    #test whether to add 360 to longitude by finding euclidean distance
-    #between two nodes, i.e. the first tuple of coords compared to the next
+    return coordinates
 
 
 def coordsToTuple(strCoords):
@@ -25,10 +26,12 @@ def coordsToTuple(strCoords):
     if "NoLat" in formatted:
         return None
 
-    #convert to float and return
-    floatedList = list(map(float, formatted.split(' ')))
+    #convert to float and return as a list
+    return list(map(float, formatted.split(' ')))
 
-    return tuple(floatedList)    
+
+def euclideanDistance(coordinates):
+    return
 
 
 def main():
@@ -37,7 +40,13 @@ def main():
 
     data = read_csv("recordedRoutes.csv")
     destinations = data["Destination"].to_list()
-    coordinates = data["Coords"].to_list()
+
+    #extract raw coordinate strings
+    coordinatesPreProcessing = data["Coords"].to_list()
+    #process weird characters out of them and turn them into a clean list
+    coordinatesPreCorrection = [coordsToTuple(item) for item in coordinatesPreProcessing]
+    #lastly, correct them for shortest path
+    coordinates = correctForDistance(coordinatesPreCorrection)
     
     #use first destination as reference after zipping two lists
     both = tuple(zip(destinations, coordinates))
@@ -48,21 +57,18 @@ def main():
     
     #iterate through both
     for destAndCoords in both:
-        if destAndCoords[0] == currentDest:
-            tupelizedCoords = coordsToTuple(destAndCoords[1])
-            if(tupelizedCoords != None):
-                coordsToPlot.append(coordsToTuple(destAndCoords[1]))
-        else:
-            #plot current path
-            mapping(m, currentDest, coordsToPlot)
-            
-            #reset current coordinates to plot
-            coordsToPlot = []
-            tupelizedCoords = coordsToTuple(destAndCoords[1])
-            if(tupelizedCoords != None):
-                coordsToPlot.append(coordsToTuple(destAndCoords[1]))
+        if destAndCoords[1] != None:
+            if destAndCoords[0] == currentDest:
+                coordsToPlot.append(destAndCoords[1])
+            else:
+                #plot current path
+                mapping(m, currentDest, coordsToPlot)
                 
-            currentDest = destAndCoords[0]
+                #reset current coordinates to plot
+                coordsToPlot = []
+                coordsToPlot.append(destAndCoords[1])
+                    
+                currentDest = destAndCoords[0]
 
 if __name__ == "__main__":
     main()
