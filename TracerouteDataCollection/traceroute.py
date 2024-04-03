@@ -43,8 +43,9 @@ def traceroute(destination, max_hops=30, timeout=1):
         return "Something went wrong, is this a real host?"
 
     #this will be added to data frame later
-    #columns are TTL, Status, Source, Coords, Date
+    #columns are Target, TTL, Status, Source, Coords, Time
     #status can be "Origin", "Intermediate", or "Reached"
+    #round trip time is stored in the data entry where the packet is "Reached" if there is one
     response = []
 
     #creating the IP and TCP headers
@@ -53,25 +54,28 @@ def traceroute(destination, max_hops=30, timeout=1):
 
     #combining the headers
     packet = ip_packet / tcp_packet
-    
+
+    #get start time
+    now = datetime.now()
+
     #sending the packet and receive a reply
     s,r = sr(packet, timeout=timeout, verbose=0)
 
-    #get start time
-    now = datetime.utcnow().strftime("%m/%d/%Y-%H:%M:%S.%f")[:-3]
-    response.append(['0', "Origin", globalClientIP, globalClientCoords, now])
+    startTime = s[0][0].sent_time
+    
+    #add point of origin to data
+    response.append([destination, '0', "Origin", globalClientIP, globalClientCoords, "-1"])
 
     for send,receive in s:
-        #get date and time in UTC
-        now = datetime.utcnow().strftime("%m/%d/%Y-%H:%M:%S.%f")[:-3]
-        
         if receive.src == destination_ip:
             #destination reached, print the details
-            response.append([str(send.ttl), "Reached", receive.src, geolocate(receive.src), now])
+            response.append([destination, str(send.ttl), "Reached", receive.src, geolocate(receive.src), str((receive.time - startTime) * 1000)])
             return response
         else:
             #printing the IP address of the intermediate hop
-            response.append([str(send.ttl), "Intermediate", receive.src, geolocate(receive.src), now])
+            response.append([destination, str(send.ttl), "Intermediate", receive.src, geolocate(receive.src), "-1"])
+
+    
     return response
 
 
@@ -81,7 +85,7 @@ def main():
         if not os.path.exists("recordedRoutes.csv"):
             with open("recordedRoutes.csv", 'w', newline='') as file:
                 writer = csv.writer(file)
-                fields = ["TTL", "Status", "Source", "Coords", "Date"]
+                fields = ["Destination", "TTL", "Status", "Source", "Coords", "Latency"]
                 writer.writerow(fields)
     
         #while loop to record each traceroute and export to csv
