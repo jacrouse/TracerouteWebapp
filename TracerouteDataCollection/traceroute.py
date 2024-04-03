@@ -1,10 +1,14 @@
 import pandas as pd
 import json
 import time
+import datetime
+import csv
 from scapy.all import *
 from urllib.request import urlopen
 
 globalClientIP = "167.99.0.220"
+globalClientCoords = "[40.7127837 -74.0059413]"
+globalHostList = ["webtan.impress.co.jp", "news.mn", "mail.ru", "ftp.sjtu.edu.cn", "sbu.ac.ir", "redfishportorford.com", "www.redfishportorford.com"]
 
 #geolocation function
 def geolocate(host):
@@ -38,6 +42,9 @@ def traceroute(destination, max_hops=30, timeout=1):
     except:
         return "Something went wrong, is this a real host?"
 
+    #this will be added to data frame later
+    #columns are TTL, Status, Source, Coords, Date
+    #status can be "Origin", "Intermediate", or "Reached"
     response = []
 
     #creating the IP and TCP headers
@@ -49,32 +56,45 @@ def traceroute(destination, max_hops=30, timeout=1):
     
     #sending the packet and receive a reply
     s,r = sr(packet, timeout=timeout, verbose=0)
-    response.append(["TTL: " + '1', "Origin", "Source: " + globalClientIP, "Coords: " + geolocate(globalClientIP)])
+
+    #get start time
+    now = datetime.utcnow().strftime("%m/%d/%Y-%H:%M:%S.%f")[:-3]
+    response.append(['0', "Origin", globalClientIP, globalClientCoords, now])
 
     for send,receive in s:
+        #get date and time in UTC
+        now = datetime.utcnow().strftime("%m/%d/%Y-%H:%M:%S.%f")[:-3]
+        
         if receive.src == destination_ip:
             #destination reached, print the details
-            response.append(["TTL: " + str(send.ttl), "Reached", "Source: " + receive.src])
+            response.append([str(send.ttl), "Reached", receive.src, geolocate(receive.src), now])
             return response
         else:
             #printing the IP address of the intermediate hop
-            response.append(["TTL: " + str(send.ttl), "Intermediate-hop", "Source: " + receive.src, "Coords: " + geolocate(receive.src)])
-
+            response.append([str(send.ttl), "Intermediate", receive.src, geolocate(receive.src), now])
     return response
 
 
 def main():
     try:
-        hosts = ["google.com", "yahoo.com"]
+        #check if file exists, if not create it
+        if not os.path.exists("recordedRoutes.csv"):
+            with open("recordedRoutes.csv", 'w', newline='') as file:
+                writer = csv.writer(file)
+                fields = ["TTL", "Status", "Source", "Coords", "Date"]
+                writer.writerow(fields)
+    
+        #while loop to record each traceroute and export to csv
         while(True):
-            for host in hosts:
-                print(traceroute(host))
-            print("Finished, restarting in 5 seconds")
-            time.sleep(5)
+            for host in globalHostList:
+                entry = traceroute(host)
+                df = pd.DataFrame(entry)
+                df.to_csv("recordedRoutes.csv", mode='a', header=False, index=False)
+                time.sleep(5)
+            time.sleep(7200)
 
     except(KeyboardInterrupt):
         exit()
-
 
 
 if __name__ == "__main__":

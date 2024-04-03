@@ -83,7 +83,7 @@ def traceroute(destination, max_hops=30, timeout=1):
     
     #sending the packet and receive a reply
     s,r = sr(packet, timeout=timeout, verbose=0)
-    response.append(["TTL: " + '1', "Origin", "Source: " + globalClientIP, "Coords: " + geolocate(globalClientIP)])
+    response.append(["TTL: " + '0', "Origin", "Source: " + globalClientIP, "Coords: " + geolocate(globalClientIP)])
 
     for send,receive in s:
         if receive.src == destination_ip:
