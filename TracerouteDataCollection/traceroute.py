@@ -8,7 +8,7 @@ from urllib.request import urlopen
 
 globalClientIP = "167.99.0.220"
 globalClientCoords = "[40.7127837 -74.0059413]"
-globalHostList = ["webtan.impress.co.jp", "news.mn", "mail.ru", "ftp.sjtu.edu.cn", "sbu.ac.ir", "redfishportorford.com", "www.redfishportorford.com"]
+globalHostList = ["borysov.com.ua", "romapass.it", "tver.ru", "yenicagaascilik.meb.k12.tr"]
 
 #geolocation function
 def geolocate(host):
@@ -95,7 +95,7 @@ def main():
                 df = pd.DataFrame(entry)
                 df.to_csv("recordedRoutes.csv", mode='a', header=False, index=False)
                 time.sleep(5)
-            time.sleep(7200)
+            time.sleep(20)
 
     except(KeyboardInterrupt):
         exit()

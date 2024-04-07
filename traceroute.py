@@ -88,7 +88,7 @@ def traceroute(destination, max_hops=30, timeout=1):
     for send,receive in s:
         if receive.src == destination_ip:
             #destination reached, print the details
-            response.append(["TTL: " + str(send.ttl), "Reached", "Source: " + receive.src])
+            response.append(["TTL: " + str(send.ttl), "Reached", "Source: " + receive.src, "Coords: " + geolocate(receive.src)])
             return formatResponse(response)
         else:
             #printing the IP address of the intermediate hop
